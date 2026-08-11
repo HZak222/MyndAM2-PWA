@@ -1,4 +1,4 @@
-const CACHE = 'mynda-v1';
+const CACHE = 'mynda-v3';
 const ASSETS = ['/', '/index.html', '/manifest.json'];
 
 self.addEventListener('install', e => {
@@ -14,11 +14,9 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  // Only cache GET requests for our own assets
   if (e.request.method !== 'GET') return;
   if (e.request.url.includes('script.google.com')) return;
   if (e.request.url.includes('fonts.googleapis.com')) return;
-
   e.respondWith(
     caches.match(e.request).then(cached => cached || fetch(e.request))
   );
