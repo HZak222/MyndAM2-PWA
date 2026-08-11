@@ -329,10 +329,10 @@ async function endSession() {
   if (uploadQueue.length > 0 && !confirm('Það eru ' + uploadQueue.length + ' myndir enn að senda. Ert þú viss?')) return;
 
   stopCamera();
-  showToast('Sendi hlekk á ' + userEmail + '...', '');
+  showToast('Sendi hlekk...', '');
 
   try {
-    await fetch(SCRIPT_URL, {
+    const res = await fetch(SCRIPT_URL, {
       method: 'POST', redirect: 'follow',
       headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify({
@@ -341,12 +341,28 @@ async function endSession() {
         photoCount: uploadedCount
       })
     });
-    showToast('✉️ Hlekkur sendur á ' + userEmail, 'success');
-  } catch {
-    showToast('Lokið — ' + uploadedCount + ' myndir sendar', 'success');
+
+    let json = null;
+    try { json = await res.json(); } catch {}
+
+    if (json && json.success) {
+      showToast('✉️ Hlekkur sendur á ' + userEmail, 'success');
+    } else if (json && json.error) {
+      showToast('Villa: ' + json.error, 'error');
+      console.error('sendLink villa:', json.error);
+    } else if (!res.ok) {
+      showToast('Netvillaog ' + res.status, 'error');
+    } else {
+      // Óþekkt svar — sennilega gamall kóði í Apps Script
+      showToast('⚠️ Uppfærðu Apps Script kóðann!', 'error');
+      console.warn('Óvænt svar frá server:', json);
+    }
+  } catch (err) {
+    showToast('Nettengi brotnaði', 'error');
+    console.error('endSession fetch villa:', err);
   }
 
-  setTimeout(showSession, 2000);
+  setTimeout(showSession, 2500);
 }
 
 function blobToBase64(blob) {
