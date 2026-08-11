@@ -11,152 +11,67 @@
   <title>Mynda</title>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --bg: #0a0a0a;
-      --surface: #161616;
-      --surface2: #1f1f1f;
-      --border: #2a2a2a;
-      --accent: #f59e0b;
-      --text: #f0f0f0;
-      --text-muted: #777;
-      --success: #22c55e;
-      --error: #ef4444;
-    }
-    * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-    html, body { height:100%; overflow:hidden; }
-    body { background:var(--bg); color:var(--text); font-family:'Barlow Condensed',system-ui,sans-serif; }
-    #app { height:100%; }
-    .screen { display:none; flex-direction:column; height:100%; }
-    .screen.active { display:flex; }
-
-    .btn {
-      display:flex; align-items:center; justify-content:center; gap:8px;
-      padding:16px 24px; border:none; border-radius:4px;
-      font-family:'Barlow Condensed',sans-serif; font-size:1.15rem; font-weight:700;
-      letter-spacing:0.08em; text-transform:uppercase; cursor:pointer;
-      transition:all 0.12s; user-select:none; -webkit-user-select:none;
-    }
-    .btn-primary { background:var(--accent); color:#000; }
-    .btn-primary:active { background:#d97706; transform:scale(0.97); }
-    .btn-ghost { background:transparent; color:var(--text-muted); border:1px solid var(--border); }
-    .btn-ghost:active { background:var(--surface2); }
-    .btn-danger { background:transparent; color:var(--error); border:1px solid var(--error); }
-    .btn-danger:active { background:rgba(239,68,68,0.12); }
-
-    input[type="text"] {
-      width:100%; background:var(--surface2); border:1px solid var(--border); border-radius:4px;
-      padding:16px; color:var(--text); font-family:'JetBrains Mono',monospace;
-      font-size:1.1rem; outline:none; transition:border-color 0.2s;
-    }
-    input:focus { border-color:var(--accent); }
-    input::placeholder { color:var(--text-muted); }
-    label {
-      display:block; font-size:0.8rem; font-weight:600;
-      letter-spacing:0.12em; text-transform:uppercase;
-      color:var(--text-muted); margin-bottom:8px;
-    }
-
-    /* shared layout */
-    .centered-screen {
-      padding: max(48px, env(safe-area-inset-top, 48px)) 24px 32px;
-      justify-content: center;
-    }
-    .logo { font-size:4.5rem; font-weight:900; color:var(--accent); line-height:1; letter-spacing:-0.02em; }
-    .logo-sub { font-size:0.8rem; letter-spacing:0.22em; text-transform:uppercase; color:var(--text-muted); margin-bottom:40px; margin-top:4px; }
-    .card { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:24px; }
-    .card-title { font-size:1.1rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-muted); margin-bottom:6px; }
-    .card-desc { font-size:0.95rem; color:var(--text-muted); line-height:1.5; margin-bottom:20px; }
-    .form-group { margin-bottom:16px; }
-    .big-input { font-size:1.8rem !important; font-weight:700; text-align:center; text-transform:uppercase; letter-spacing:0.12em; padding:20px !important; }
-    .input-hint { text-align:center; font-size:0.78rem; color:var(--text-muted); margin-top:8px; }
-
-    /* session screen extras */
-    .session-logo { font-size:3.5rem; font-weight:900; color:var(--accent); letter-spacing:-0.02em; text-align:center; margin-bottom:6px; }
-    .user-bar { display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:32px; }
-    .user-chip {
-      background:var(--surface2); border:1px solid var(--border);
-      border-radius:100px; padding:5px 14px;
-      font-family:'JetBrains Mono',monospace; font-size:0.85rem; color:var(--text-muted);
-      display:flex; align-items:center; gap:6px;
-    }
-    .user-chip strong { color:var(--accent); font-weight:700; }
-    .change-btn {
-      background:none; border:none; color:var(--text-muted); cursor:pointer;
-      font-family:'Barlow Condensed',sans-serif; font-size:0.8rem;
-      letter-spacing:0.08em; text-transform:uppercase; padding:4px 8px;
-    }
-    .btn-start { font-size:1.4rem; padding:20px; margin-top:20px; width:100%; }
-
+    :root{--bg:#0a0a0a;--surface:#161616;--surface2:#1f1f1f;--border:#2a2a2a;--accent:#f59e0b;--text:#f0f0f0;--text-muted:#777;--success:#22c55e;--error:#ef4444}
+    *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html,body{height:100%;overflow:hidden}
+    body{background:var(--bg);color:var(--text);font-family:'Barlow Condensed',system-ui,sans-serif}
+    #app{height:100%}
+    .screen{display:none;flex-direction:column;height:100%}
+    .screen.active{display:flex}
+    .btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:16px 24px;border:none;border-radius:4px;font-family:'Barlow Condensed',sans-serif;font-size:1.15rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:all .12s;user-select:none;-webkit-user-select:none}
+    .btn-primary{background:var(--accent);color:#000}.btn-primary:active{background:#d97706;transform:scale(.97)}
+    .btn-ghost{background:transparent;color:var(--text-muted);border:1px solid var(--border)}.btn-ghost:active{background:var(--surface2)}
+    .btn-danger{background:transparent;color:var(--error);border:1px solid var(--error)}.btn-danger:active{background:rgba(239,68,68,.12)}
+    input[type="text"],input[type="email"]{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:16px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:1rem;outline:none;transition:border-color .2s}
+    input:focus{border-color:var(--accent)}
+    input.invalid{border-color:var(--error)}
+    input::placeholder{color:var(--text-muted)}
+    label{display:block;font-size:.8rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px}
+    .page{padding:max(48px,env(safe-area-inset-top,48px)) 24px 32px;justify-content:center}
+    .logo{font-size:4.5rem;font-weight:900;color:var(--accent);line-height:1;letter-spacing:-.02em}
+    .logo-sub{font-size:.8rem;letter-spacing:.22em;text-transform:uppercase;color:var(--text-muted);margin-bottom:40px;margin-top:4px}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:24px}
+    .card-title{font-size:1.1rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px}
+    .card-desc{font-size:.95rem;color:var(--text-muted);line-height:1.5;margin-bottom:20px}
+    .fg{margin-bottom:16px}
+    .field-err{font-size:.78rem;color:var(--error);margin-top:6px;display:none}
+    .field-err.show{display:block}
+    .big-input{font-size:1.8rem!important;font-weight:700;text-align:center;text-transform:uppercase;letter-spacing:.12em;padding:20px!important}
+    .divider{border:none;border-top:1px solid var(--border);margin:20px 0}
+    .session-logo{font-size:3.5rem;font-weight:900;color:var(--accent);letter-spacing:-.02em;text-align:center;margin-bottom:6px}
+    .user-bar{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:28px;flex-wrap:wrap}
+    .user-chip{background:var(--surface2);border:1px solid var(--border);border-radius:100px;padding:5px 14px;font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--text-muted);display:flex;align-items:center;gap:6px;max-width:100%;overflow:hidden}
+    .user-chip strong{color:var(--accent);font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .change-btn{background:none;border:none;color:var(--text-muted);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;flex-shrink:0}
+    .btn-start{font-size:1.4rem;padding:20px;margin-top:20px;width:100%}
     /* camera */
-    #screen-camera { padding:0; position:relative; background:#000; }
-    #video { width:100%; height:100%; object-fit:cover; display:block; }
-    #canvas { display:none; }
-    .cam-overlay { position:absolute; inset:0; display:flex; flex-direction:column; pointer-events:none; }
-    .cam-top {
-      padding:16px 16px 20px;
-      padding-top: max(16px, env(safe-area-inset-top, 16px));
-      background:linear-gradient(to bottom, rgba(0,0,0,0.72), transparent);
-      display:flex; align-items:flex-start; flex-wrap:wrap; gap:8px;
-      pointer-events:all;
-    }
-    .session-badge {
-      background:var(--accent); color:#000;
-      font-family:'JetBrains Mono',monospace; font-weight:700;
-      font-size:1rem; letter-spacing:0.06em; text-transform:uppercase;
-      padding:6px 12px; border-radius:4px;
-    }
-    .info-pill {
-      background:rgba(0,0,0,0.55); color:#fff;
-      font-family:'JetBrains Mono',monospace; font-size:0.85rem;
-      padding:6px 12px; border-radius:4px;
-      border:1px solid rgba(255,255,255,0.18);
-      display:flex; align-items:center; gap:6px;
-    }
-    .dot { width:8px; height:8px; border-radius:50%; background:currentColor; flex-shrink:0; }
-    .dot.pulse { animation:pulse 1.2s infinite; }
-    @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.25} }
-    .status-ok { color:var(--success); }
-    .status-pending { color:var(--accent); }
-    .status-error { color:var(--error); }
-    .cam-spacer { flex:1; }
-    .cam-bottom {
-      padding:20px 24px;
-      padding-bottom: max(24px, env(safe-area-inset-bottom, 24px));
-      background:linear-gradient(to top, rgba(0,0,0,0.8), transparent);
-      display:flex; align-items:center; justify-content:space-between;
-      pointer-events:all;
-    }
-    .btn-capture {
-      width:80px; height:80px; border-radius:50%;
-      background:white; border:4px solid rgba(255,255,255,0.35);
-      cursor:pointer; position:relative; outline:none; transition:transform 0.1s;
-    }
-    .btn-capture::after { content:''; position:absolute; inset:6px; border-radius:50%; background:white; }
-    .btn-capture:active { transform:scale(0.90); }
-
-    .cam-err {
-      position:absolute; inset:0; display:none;
-      flex-direction:column; align-items:center; justify-content:center;
-      background:#000; padding:36px; text-align:center;
-    }
-    .cam-err.show { display:flex; }
-    .cam-err h3 { font-size:1.3rem; font-weight:700; color:var(--error); margin-bottom:12px; }
-    .cam-err p { color:var(--text-muted); font-size:1rem; line-height:1.6; }
-
-    .flash-overlay { position:fixed; inset:0; background:white; opacity:0; pointer-events:none; z-index:100; transition:opacity 0.05s; }
-    .flash-overlay.flash { opacity:0.65; transition:opacity 0s; }
-
-    .toast {
-      position:fixed; bottom:140px; left:50%;
-      transform:translateX(-50%) translateY(16px);
-      background:var(--surface); border:1px solid var(--border);
-      color:var(--text); padding:10px 22px; border-radius:100px;
-      font-size:0.9rem; letter-spacing:0.05em; opacity:0;
-      pointer-events:none; z-index:200; transition:all 0.25s; white-space:nowrap;
-    }
-    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
-    .toast.success { border-color:var(--success); color:var(--success); }
-    .toast.error { border-color:var(--error); color:var(--error); }
+    #screen-camera{padding:0;position:relative;background:#000}
+    #video{width:100%;height:100%;object-fit:cover;display:block}
+    #canvas{display:none}
+    .cam-overlay{position:absolute;inset:0;display:flex;flex-direction:column;pointer-events:none}
+    .cam-top{padding:16px 16px 20px;padding-top:max(16px,env(safe-area-inset-top,16px));background:linear-gradient(to bottom,rgba(0,0,0,.72),transparent);display:flex;align-items:flex-start;flex-wrap:wrap;gap:8px;pointer-events:all}
+    .session-badge{background:var(--accent);color:#000;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1rem;letter-spacing:.06em;text-transform:uppercase;padding:6px 12px;border-radius:4px}
+    .info-pill{background:rgba(0,0,0,.55);color:#fff;font-family:'JetBrains Mono',monospace;font-size:.82rem;padding:6px 12px;border-radius:4px;border:1px solid rgba(255,255,255,.18);display:flex;align-items:center;gap:6px;max-width:220px;overflow:hidden}
+    .info-pill span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .dot{width:8px;height:8px;border-radius:50%;background:currentColor;flex-shrink:0}
+    .dot.pulse{animation:pulse 1.2s infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+    .status-ok{color:var(--success)}.status-pending{color:var(--accent)}.status-error{color:var(--error)}
+    .cam-spacer{flex:1}
+    .cam-bottom{padding:20px 24px;padding-bottom:max(24px,env(safe-area-inset-bottom,24px));background:linear-gradient(to top,rgba(0,0,0,.8),transparent);display:flex;align-items:center;justify-content:space-between;pointer-events:all}
+    .btn-capture{width:80px;height:80px;border-radius:50%;background:white;border:4px solid rgba(255,255,255,.35);cursor:pointer;position:relative;outline:none;transition:transform .1s}
+    .btn-capture::after{content:'';position:absolute;inset:6px;border-radius:50%;background:white}
+    .btn-capture:active{transform:scale(.90)}
+    .cam-err{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;background:#000;padding:36px;text-align:center}
+    .cam-err.show{display:flex}
+    .cam-err h3{font-size:1.3rem;font-weight:700;color:var(--error);margin-bottom:12px}
+    .cam-err p{color:var(--text-muted);font-size:1rem;line-height:1.6}
+    .flash-overlay{position:fixed;inset:0;background:white;opacity:0;pointer-events:none;z-index:100;transition:opacity .05s}
+    .flash-overlay.flash{opacity:.65;transition:opacity 0s}
+    .toast{position:fixed;bottom:140px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--surface);border:1px solid var(--border);color:var(--text);padding:10px 22px;border-radius:100px;font-size:.9rem;letter-spacing:.05em;opacity:0;pointer-events:none;z-index:200;transition:all .25s;white-space:nowrap}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+    .toast.success{border-color:var(--success);color:var(--success)}
+    .toast.error{border-color:var(--error);color:var(--error)}
   </style>
 </head>
 <body>
@@ -164,67 +79,62 @@
   <div class="flash-overlay" id="flash-overlay"></div>
   <div class="toast" id="toast"></div>
 
-  <!-- ===== 1. NAFN — sýnt bara í fyrsta skipti ===== -->
-  <div class="screen active" id="screen-name">
-    <div class="centered-screen" style="display:flex;flex-direction:column">
+  <!-- 1. EMAIL — fyrsta skipti -->
+  <div class="screen active" id="screen-email">
+    <div class="page" style="display:flex;flex-direction:column">
       <div class="logo">MYNDA</div>
       <div class="logo-sub">Ljósmyndun → Google Drive</div>
       <div class="card">
         <div class="card-title">👋 Velkomin/n!</div>
-        <div class="card-desc">Sláðu inn nafn þitt eða auðkenni tækisins. Þetta vistast og kemur á allar myndir þínar.</div>
-        <div class="form-group">
-          <label>Nafn / Auðkenni tækis</label>
-          <input type="text" id="name-input"
-            placeholder="t.d. Jón, Sími B, Bifreið 1..."
-            autocomplete="off" spellcheck="false"
-            autocapitalize="words" maxlength="20">
+        <div class="card-desc">Sláðu inn vinnupóstfang þitt. Þetta vistast í símann og þú færð hlekk á myndirnar þegar þú ert búin/n.</div>
+        <div class="fg">
+          <label>Vinnupóstfang</label>
+          <input type="email" id="email-input"
+            placeholder="nafn@bl.is"
+            autocomplete="email" spellcheck="false"
+            autocapitalize="none" maxlength="60"
+            inputmode="email">
+          <div class="field-err" id="email-err">Póstfangið þarf að vera @bl.is</div>
         </div>
-        <button class="btn btn-primary" style="width:100%;margin-top:4px" onclick="saveName()">
-          Halda áfram →
-        </button>
+        <button class="btn btn-primary" style="width:100%;margin-top:4px" onclick="saveEmail()">Halda áfram →</button>
       </div>
     </div>
   </div>
 
-  <!-- ===== 2. BÍLNÚMER — sýnt við hvert session ===== -->
+  <!-- 2. SESSION — bílnúmer -->
   <div class="screen" id="screen-session">
-    <div class="centered-screen" style="display:flex;flex-direction:column">
+    <div class="page" style="display:flex;flex-direction:column">
       <div class="session-logo">MYNDA</div>
       <div class="user-bar">
-        <div class="user-chip">👤 <strong id="user-display">—</strong></div>
-        <button class="change-btn" onclick="changeName()">breyta</button>
+        <div class="user-chip">✉️ <strong id="user-display">—</strong></div>
+        <button class="change-btn" onclick="changeEmail()">breyta</button>
       </div>
       <div class="card">
-        <div class="form-group">
+        <div class="fg" style="margin-bottom:0">
           <label>Bílnúmer</label>
-          <input type="text" id="plate-input"
-            class="big-input"
-            placeholder="ABC 123"
-            autocomplete="off" spellcheck="false"
-            autocapitalize="characters" maxlength="20">
-          <p class="input-hint">Sláðu inn bílnúmer</p>
+          <input type="text" id="plate-input" class="big-input" placeholder="ABC 123"
+            autocomplete="off" spellcheck="false" autocapitalize="characters" maxlength="15">
+          <div class="field-err" id="plate-err">Sláðu inn bílnúmer</div>
         </div>
         <button class="btn btn-primary btn-start" onclick="startSession()">📷 Hefja Session</button>
       </div>
     </div>
   </div>
 
-  <!-- ===== 3. MYNDAVÉL ===== -->
+  <!-- 3. MYNDAVÉL -->
   <div class="screen" id="screen-camera">
     <video id="video" autoplay playsinline muted></video>
     <canvas id="canvas"></canvas>
-
     <div class="cam-err" id="cam-err">
       <div style="font-size:3rem;margin-bottom:16px">🚫</div>
       <h3>Myndavél leyfð ekki</h3>
       <p>Þú þarft að leyfa aðgang að myndavél í stillingum vafrans eða símsins.</p>
       <button class="btn btn-ghost" style="margin-top:24px" onclick="showSession()">← Til baka</button>
     </div>
-
     <div class="cam-overlay">
       <div class="cam-top">
         <div class="session-badge" id="cam-plate">—</div>
-        <div class="info-pill" id="cam-user">👤 —</div>
+        <div class="info-pill" id="cam-user">✉️ <span>—</span></div>
         <div class="info-pill" id="pill-count">📷 0</div>
         <div class="info-pill status-ok" id="pill-status">
           <div class="dot" id="status-dot"></div>
@@ -236,88 +146,97 @@
         <div style="width:90px"></div>
         <button class="btn-capture" onclick="capturePhoto()"></button>
         <div style="width:90px;display:flex;justify-content:flex-end">
-          <button class="btn btn-danger" style="font-size:0.95rem;padding:12px 14px" onclick="endSession()">Ljúka</button>
+          <button class="btn btn-danger" style="font-size:.95rem;padding:12px 14px" onclick="endSession()">Ljúka</button>
         </div>
       </div>
     </div>
   </div>
-
 </div>
-<script>
-// ============================================================
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwtbt6O3J35nXC-TVKJKBwdkPHY15L2FryZWoc4r44-msladRQtpVCaE0i5iDs_aDK88Q/exec';
-// ============================================================
 
-let userId    = '';
-let sessionId = '';
-let photoCount    = 0;
-let uploadedCount = 0;
-let failedCount   = 0;
-let uploadQueue   = [];
-let isUploading   = false;
-let cameraStream  = null;
+<script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwtbt6O3J35nXC-TVKJKBwdkPHY15L2FryZWoc4r44-msladRQtpVCaE0i5iDs_aDK88Q/exec';
+const ALLOWED_DOMAIN = 'bl.is'; // Aðeins þetta lén leyft
+
+let userEmail = '', plate = '';
+let photoCount = 0, uploadedCount = 0, failedCount = 0;
+let uploadQueue = [], isUploading = false, cameraStream = null;
 
 // ===== INIT =====
 window.addEventListener('load', () => {
-  userId = localStorage.getItem('userId') || '';
-  if (userId) {
-    showSession();
-  } else {
-    showScreen('name');
-  }
+  userEmail = localStorage.getItem('userEmail') || '';
+  if (userEmail) showSession(); else showScreen('email');
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 });
 
-function showScreen(name) {
+function showScreen(n) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById('screen-' + name).classList.add('active');
+  document.getElementById('screen-' + n).classList.add('active');
 }
 
-// ===== NAFN (fyrsta skipti) =====
-function saveName() {
-  const inp  = document.getElementById('name-input');
-  const name = inp.value.trim().toUpperCase().replace(/\s+/g, '_');
-  if (!name) { showToast('Sláðu inn nafn', 'error'); inp.focus(); return; }
-  userId = name;
-  localStorage.setItem('userId', userId);
+// ===== EMAIL =====
+function isValidEmail(e) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e) && e.toLowerCase().endsWith('@' + ALLOWED_DOMAIN);
+}
+
+function saveEmail() {
+  const inp = document.getElementById('email-input');
+  const errEl = document.getElementById('email-err');
+  const email = inp.value.trim().toLowerCase();
+
+  if (!isValidEmail(email)) {
+    inp.classList.add('invalid');
+    errEl.classList.add('show');
+    inp.focus();
+    return;
+  }
+  inp.classList.remove('invalid');
+  errEl.classList.remove('show');
+  userEmail = email;
+  localStorage.setItem('userEmail', userEmail);
   showSession();
 }
 
-function changeName() {
-  if (!confirm('Breyta nafni?\n\nNúverandi: ' + userId)) return;
-  localStorage.removeItem('userId');
-  userId = '';
-  document.getElementById('name-input').value = '';
-  showScreen('name');
-  setTimeout(() => document.getElementById('name-input').focus(), 300);
+function changeEmail() {
+  if (!confirm('Breyta póstfangi?\n\nNúverandi: ' + userEmail)) return;
+  localStorage.removeItem('userEmail');
+  userEmail = '';
+  document.getElementById('email-input').value = '';
+  showScreen('email');
+  setTimeout(() => document.getElementById('email-input').focus(), 300);
 }
 
-// ===== BÍLNÚMER =====
+// ===== SESSION =====
 function showSession() {
   stopCamera();
-  document.getElementById('user-display').textContent = userId;
-  document.getElementById('plate-input').value = '';   // alltaf tómt bílnúmer
+  document.getElementById('user-display').textContent = userEmail;
+  document.getElementById('plate-input').value = '';
+  document.getElementById('plate-err').classList.remove('show');
+  document.getElementById('plate-input').classList.remove('invalid');
   showScreen('session');
   setTimeout(() => document.getElementById('plate-input').focus(), 300);
 }
 
 function startSession() {
-  const inp   = document.getElementById('plate-input');
-  const plate = inp.value.trim().toUpperCase().replace(/\s+/g, '');
-  if (!plate) { showToast('Sláðu inn bílnúmer', 'error'); inp.focus(); return; }
-  sessionId     = plate;
-  photoCount    = 0;
-  uploadedCount = 0;
-  failedCount   = 0;
-  uploadQueue   = [];
+  const inp = document.getElementById('plate-input');
+  const p = inp.value.trim().toUpperCase().replace(/\s+/g, '');
+  if (!p) {
+    inp.classList.add('invalid');
+    document.getElementById('plate-err').classList.add('show');
+    inp.focus();
+    return;
+  }
+  inp.classList.remove('invalid');
+  document.getElementById('plate-err').classList.remove('show');
+  plate = p;
+  photoCount = 0; uploadedCount = 0; failedCount = 0; uploadQueue = [];
   startCamera();
 }
 
 // ===== MYNDAVÉL =====
 async function startCamera() {
   showScreen('camera');
-  document.getElementById('cam-plate').textContent = sessionId;
-  document.getElementById('cam-user').textContent  = '👤 ' + userId;
+  document.getElementById('cam-plate').textContent = plate;
+  document.getElementById('cam-user').innerHTML = '✉️ <span>' + userEmail + '</span>';
   document.getElementById('cam-err').classList.remove('show');
   updateUI();
   try {
@@ -340,53 +259,46 @@ function stopCamera() {
 function capturePhoto() {
   const video = document.getElementById('video');
   if (!video.videoWidth) return;
-
   const fl = document.getElementById('flash-overlay');
-  fl.classList.add('flash');
-  setTimeout(() => fl.classList.remove('flash'), 100);
-
+  fl.classList.add('flash'); setTimeout(() => fl.classList.remove('flash'), 100);
   const canvas = document.getElementById('canvas');
-  canvas.width  = video.videoWidth;
-  canvas.height = video.videoHeight;
+  canvas.width = video.videoWidth; canvas.height = video.videoHeight;
   canvas.getContext('2d').drawImage(video, 0, 0);
-
-  photoCount++;
-  updateUI();
-
+  photoCount++; updateUI();
   canvas.toBlob(blob => {
-    const ts  = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+    const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
     const num = String(photoCount).padStart(3, '0');
-    const filename = sessionId + '_' + userId + '_' + ts + '_' + num + '.jpg';
+    const filename = plate + '_' + ts + '_' + num + '.jpg';
     queueUpload(blob, filename);
   }, 'image/jpeg', 0.82);
 }
 
 // ===== UPLOAD =====
 function queueUpload(blob, filename) {
-  uploadQueue.push({ blob, filename, retries: 0 });
-  updateUI();
-  processQueue();
+  uploadQueue.push({ blob, filename, retries: 0 }); updateUI(); processQueue();
 }
 
 async function processQueue() {
   if (isUploading || uploadQueue.length === 0) return;
-  isUploading = true;
-  updateUI();
+  isUploading = true; updateUI();
   const item = uploadQueue[0];
   try {
     const b64 = await blobToBase64(item.blob);
     const res = await fetch(SCRIPT_URL, {
       method: 'POST', redirect: 'follow',
       headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({ sessionId, userId, imageBase64: b64.split(',')[1], filename: item.filename })
+      body: JSON.stringify({
+        action: 'upload',
+        userEmail, plate,
+        imageBase64: b64.split(',')[1],
+        filename: item.filename
+      })
     });
     let ok = res.ok;
     try { const j = await res.json(); ok = j.success; } catch {}
-    if (ok) { uploadQueue.shift(); uploadedCount++; }
-    else handleFail(item);
+    if (ok) { uploadQueue.shift(); uploadedCount++; } else handleFail(item);
   } catch { handleFail(item); }
-  isUploading = false;
-  updateUI();
+  isUploading = false; updateUI();
   if (uploadQueue.length > 0) setTimeout(processQueue, 1800);
 }
 
@@ -398,8 +310,8 @@ function handleFail(item) {
 function updateUI() {
   document.getElementById('pill-count').textContent = '📷 ' + photoCount;
   const pill = document.getElementById('pill-status');
-  const dot  = document.getElementById('status-dot');
-  const txt  = document.getElementById('status-text');
+  const dot = document.getElementById('status-dot');
+  const txt = document.getElementById('status-text');
   const pend = uploadQueue.length;
   if (failedCount > 0) {
     pill.className = 'info-pill status-error'; dot.classList.add('pulse'); txt.textContent = failedCount + ' mistókst';
@@ -412,11 +324,29 @@ function updateUI() {
   }
 }
 
-function endSession() {
+// ===== LJÚKA — sendir póst með hlekk =====
+async function endSession() {
   if (uploadQueue.length > 0 && !confirm('Það eru ' + uploadQueue.length + ' myndir enn að senda. Ert þú viss?')) return;
+
   stopCamera();
-  showToast('Lokið — ' + uploadedCount + ' myndir sendar', 'success');
-  setTimeout(showSession, 1200);
+  showToast('Sendi hlekk á ' + userEmail + '...', '');
+
+  try {
+    await fetch(SCRIPT_URL, {
+      method: 'POST', redirect: 'follow',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({
+        action: 'sendLink',
+        userEmail, plate,
+        photoCount: uploadedCount
+      })
+    });
+    showToast('✉️ Hlekkur sendur á ' + userEmail, 'success');
+  } catch {
+    showToast('Lokið — ' + uploadedCount + ' myndir sendar', 'success');
+  }
+
+  setTimeout(showSession, 2000);
 }
 
 function blobToBase64(blob) {
@@ -425,12 +355,12 @@ function blobToBase64(blob) {
 
 function showToast(msg, type) {
   const t = document.getElementById('toast');
-  t.textContent = msg; t.className = 'toast ' + (type||'') + ' show';
-  setTimeout(() => t.classList.remove('show'), 2800);
+  t.textContent = msg; t.className = 'toast ' + (type || '') + ' show';
+  setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-document.getElementById('name-input').addEventListener('keydown',  e => { if (e.key==='Enter') saveName(); });
-document.getElementById('plate-input').addEventListener('keydown', e => { if (e.key==='Enter') startSession(); });
+document.getElementById('email-input').addEventListener('keydown', e => { if (e.key === 'Enter') saveEmail(); });
+document.getElementById('plate-input').addEventListener('keydown', e => { if (e.key === 'Enter') startSession(); });
 </script>
 </body>
 </html>
