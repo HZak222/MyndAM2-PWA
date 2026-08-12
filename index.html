@@ -91,7 +91,7 @@
       <div class="logo-sub">Ljósmyndun → Google Drive</div>
       <div class="card">
         <div class="card-title">👋 Velkomin/n!</div>
-        <div class="card-desc">Sláðu inn vinnupóstfang þitt. Þetta vistast í símann og þú færð hlekk á myndirnar þegar þú ert búin/n.</div>
+        <div class="card-desc">Sláðu inn vinnupóstfang þitt. Þetta vistast í símann og myndirnar fara sjálfkrafa í möppuna þína.</div>
         <div class="fg">
           <label>Vinnupóstfang</label>
           <input type="email" id="email-input"
@@ -381,43 +381,14 @@ function updateUI() {
   }
 }
 
-// ===== LJÚKA — sendir póst með hlekk =====
+// ===== LJÚKA — staðfestir að myndirnar hafi verið sendar =====
 async function endSession() {
   if (uploadQueue.length > 0 && !confirm('Það eru ' + uploadQueue.length + ' myndir enn að senda. Ert þú viss?')) return;
 
   stopCamera();
-  showToast('Sendi hlekk...', '');
 
-  try {
-    const res = await fetch(SCRIPT_URL, {
-      method: 'POST', redirect: 'follow',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({
-        action: 'sendLink',
-        userEmail, plate,
-        photoCount: photoCount
-      })
-    });
-
-    let json = null;
-    try { json = await res.json(); } catch {}
-
-    if (json && json.success) {
-      showToast('✉️ Hlekkur sendur á ' + userEmail, 'success');
-    } else if (json && json.error) {
-      showToast('Villa: ' + json.error, 'error');
-      console.error('sendLink villa:', json.error);
-    } else if (!res.ok) {
-      showToast('Netvillaog ' + res.status, 'error');
-    } else {
-      // Óþekkt svar — sennilega gamall kóði í Apps Script
-      showToast('⚠️ Uppfærðu Apps Script kóðann!', 'error');
-      console.warn('Óvænt svar frá server:', json);
-    }
-  } catch (err) {
-    showToast('Nettengi brotnaði', 'error');
-    console.error('endSession fetch villa:', err);
-  }
+  const count = uploadedCount > 0 ? uploadedCount : photoCount;
+  showToast('✅ ' + count + ' mynd' + (count === 1 ? '' : 'ir') + ' sendar', 'success');
 
   setTimeout(showSession, 2500);
 }
