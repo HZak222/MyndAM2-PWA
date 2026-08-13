@@ -77,6 +77,18 @@
     .zoom-row{display:none;align-items:center;gap:10px;padding:0 24px 14px;pointer-events:all}
     .zoom-row span{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--text-muted);width:28px}
     .zoom-row input[type="range"]{flex:1;accent-color:var(--accent)}
+    .device-toggle{display:flex;gap:8px;margin-bottom:18px}
+    .device-btn{flex:1;padding:10px 8px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text-muted);font-size:.85rem;font-weight:600;cursor:pointer;transition:all .15s}
+    .device-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(245,158,11,.1)}
+    .device-hint{font-size:.72rem;color:var(--text-muted);margin:-12px 0 18px}
+    .device-line{font-size:.72rem;color:var(--text-muted);text-align:center;margin-top:10px}
+    .device-line a{color:var(--accent);text-decoration:none}
+    .info-pill.btn-lens{cursor:pointer}
+    .lens-panel{display:none;position:absolute;top:64px;right:16px;z-index:40;background:rgba(20,20,20,.95);border:1px solid rgba(255,255,255,.18);border-radius:10px;padding:6px;min-width:200px;pointer-events:all}
+    .lens-panel.show{display:block}
+    .lens-opt{padding:10px 12px;border-radius:6px;color:#fff;font-size:.85rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:8px}
+    .lens-opt:hover{background:rgba(255,255,255,.08)}
+    .lens-opt.active{color:var(--accent);font-weight:600}
   </style>
 </head>
 <body>
@@ -91,6 +103,11 @@
       <div class="logo-sub">Ljósmyndun → Google Drive</div>
       <div class="card">
         <div class="card-title">👋 Velkomin/n!</div>
+        <div class="device-toggle">
+          <button type="button" class="device-btn active" id="btn-device-private" onclick="setDeviceType('private')">📱 Einkasími</button>
+          <button type="button" class="device-btn" id="btn-device-shared" onclick="setDeviceType('shared')">🏢 Almenningssími</button>
+        </div>
+        <div class="device-hint" id="device-hint">Netfangið vistast í símanum þar til þú breytir því.</div>
         <div class="card-desc">Sláðu inn vinnupóstfang þitt. Þetta vistast í símann og myndirnar fara sjálfkrafa í möppuna þína.</div>
         <div class="fg">
           <label>Vinnupóstfang</label>
@@ -114,6 +131,7 @@
         <div class="user-chip">✉️ <strong id="user-display">—</strong></div>
         <button class="change-btn" onclick="changeEmail()">breyta</button>
       </div>
+      <div class="device-line">Sími: <span id="device-label">Einkasími</span> · <a href="#" onclick="toggleDeviceTypeQuick();return false">breyta</a></div>
       <div class="card">
         <div class="fg" style="margin-bottom:0">
           <label>Bílnúmer</label>
@@ -145,7 +163,11 @@
           <div class="dot" id="status-dot"></div>
           <span id="status-text">Tilbúið</span>
         </div>
+        <div class="info-pill btn-lens" id="pill-lens" onclick="toggleLensPanel()" style="display:none">
+          🔁 <span id="lens-label">Linsa</span>
+        </div>
       </div>
+      <div class="lens-panel" id="lens-panel"></div>
       <div class="cam-spacer"></div>
       <div class="zoom-row" id="zoom-row">
         <span>−</span>
@@ -169,17 +191,30 @@
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwtbt6O3J35nXC-TVKJKBwdkPHY15L2FryZWoc4r44-msladRQtpVCaE0i5iDs_aDK88Q/exec';
 const ALLOWED_DOMAIN = 'bl.is'; // Aðeins þetta lén leyft
 
-let userEmail = '', plate = '';
+let userEmail = '', plate = '', deviceType = 'private';
 let photoCount = 0, uploadedCount = 0, failedCount = 0;
 let uploadQueue = [], isUploading = false, cameraStream = null;
 let videoTrack = null, torchOn = false;
+let preferredCameraId = localStorage.getItem('preferredCameraId') || '';
 
 // ===== INIT =====
 window.addEventListener('load', () => {
+  deviceType = localStorage.getItem('deviceType') || 'private';
+  setDeviceType(deviceType);
   userEmail = localStorage.getItem('userEmail') || '';
   if (userEmail) showSession(); else showScreen('email');
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 });
+
+function setDeviceType(type) {
+  deviceType = type;
+  localStorage.setItem('deviceType', type);
+  document.getElementById('btn-device-private').classList.toggle('active', type === 'private');
+  document.getElementById('btn-device-shared').classList.toggle('active', type === 'shared');
+  document.getElementById('device-hint').textContent = type === 'shared'
+    ? 'Netfangið hreinsast sjálfkrafa eftir hverja session - næsti notandi slær inn sitt eigið.'
+    : 'Netfangið vistast í símanum þar til þú breytir því.';
+}
 
 function showScreen(n) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -222,11 +257,18 @@ function changeEmail() {
 function showSession() {
   stopCamera();
   document.getElementById('user-display').textContent = userEmail;
+  document.getElementById('device-label').textContent = deviceType === 'shared' ? 'Almenningssími' : 'Einkasími';
   document.getElementById('plate-input').value = '';
   document.getElementById('plate-err').classList.remove('show');
   document.getElementById('plate-input').classList.remove('invalid');
   showScreen('session');
   setTimeout(() => document.getElementById('plate-input').focus(), 300);
+}
+
+function toggleDeviceTypeQuick() {
+  const next = deviceType === 'shared' ? 'private' : 'shared';
+  setDeviceType(next);
+  document.getElementById('device-label').textContent = next === 'shared' ? 'Almenningssími' : 'Einkasími';
 }
 
 function startSession() {
@@ -246,25 +288,85 @@ function startSession() {
 }
 
 // ===== MYNDAVÉL =====
-async function startCamera() {
+async function startCamera(deviceId) {
   showScreen('camera');
   document.getElementById('cam-plate').textContent = plate;
   document.getElementById('cam-user').innerHTML = '✉️ <span>' + userEmail + '</span>';
   document.getElementById('cam-err').classList.remove('show');
   updateUI();
+
+  const chosenId = deviceId || preferredCameraId;
+  const videoConstraints = chosenId
+    ? { deviceId: { exact: chosenId }, width: { ideal: 1920 }, height: { ideal: 1080 } }
+    : { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } };
+
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } },
-      audio: false
-    });
+    let stream;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ video: videoConstraints, audio: false });
+    } catch {
+      // Vistaða linsan er kannski ekki lengur til (t.d. eftir tækjaskipti) - reyni sjálfgefna linsu
+      if (chosenId) {
+        preferredCameraId = '';
+        localStorage.removeItem('preferredCameraId');
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } },
+          audio: false
+        });
+      } else { throw 0; }
+    }
     cameraStream = stream;
     document.getElementById('video').srcObject = stream;
     videoTrack = stream.getVideoTracks()[0];
     setupCameraControls();
+    setupLensPicker();
   } catch {
     document.getElementById('cam-err').classList.add('show');
   }
 }
+
+async function setupLensPicker() {
+  const pill = document.getElementById('pill-lens');
+  const panel = document.getElementById('lens-panel');
+  try {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const cams = devices.filter(d => d.kind === 'videoinput');
+    if (cams.length < 2) { pill.style.display = 'none'; panel.classList.remove('show'); return; }
+
+    const activeId = videoTrack.getSettings().deviceId;
+    document.getElementById('lens-label').textContent = 'Linsa ' + (cams.findIndex(c => c.deviceId === activeId) + 1);
+    pill.style.display = 'flex';
+
+    panel.innerHTML = cams.map((c, i) => {
+      const label = c.label ? c.label.replace(/^.*?,\s*/, '') : ('Myndavél ' + (i + 1));
+      const active = c.deviceId === activeId;
+      return '<div class="lens-opt' + (active ? ' active' : '') + '" onclick="selectLens(\'' + c.deviceId + '\')">'
+           + '<span>' + label + '</span>' + (active ? '<span>✓</span>' : '') + '</div>';
+    }).join('');
+  } catch {
+    pill.style.display = 'none';
+  }
+}
+
+function toggleLensPanel() {
+  document.getElementById('lens-panel').classList.toggle('show');
+}
+
+async function selectLens(deviceId) {
+  document.getElementById('lens-panel').classList.remove('show');
+  preferredCameraId = deviceId;
+  localStorage.setItem('preferredCameraId', deviceId);
+  if (cameraStream) cameraStream.getTracks().forEach(t => t.stop());
+  await startCamera(deviceId);
+}
+
+document.addEventListener('click', (e) => {
+  const panel = document.getElementById('lens-panel');
+  const pill = document.getElementById('pill-lens');
+  if (panel && panel.classList.contains('show') && !panel.contains(e.target) && e.target !== pill && !pill.contains(e.target)) {
+    panel.classList.remove('show');
+  }
+});
 
 function setupCameraControls() {
   const flashBtn = document.getElementById('btn-flash');
@@ -311,6 +413,8 @@ function stopCamera() {
   document.getElementById('btn-flash').classList.remove('active');
   document.getElementById('btn-flash').style.display = 'none';
   document.getElementById('zoom-row').style.display = 'none';
+  document.getElementById('pill-lens').style.display = 'none';
+  document.getElementById('lens-panel').classList.remove('show');
 }
 
 function capturePhoto() {
@@ -390,7 +494,16 @@ async function endSession() {
   const count = uploadedCount > 0 ? uploadedCount : photoCount;
   showToast('✅ ' + count + ' mynd' + (count === 1 ? '' : 'ir') + ' sendar', 'success');
 
-  setTimeout(showSession, 2500);
+  if (deviceType === 'shared') {
+    localStorage.removeItem('userEmail');
+    userEmail = '';
+    setTimeout(() => {
+      document.getElementById('email-input').value = '';
+      showScreen('email');
+    }, 2500);
+  } else {
+    setTimeout(showSession, 2500);
+  }
 }
 
 function blobToBase64(blob) {
