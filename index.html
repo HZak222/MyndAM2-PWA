@@ -384,8 +384,13 @@ function setupCameraControls() {
     zoomSlider.min = caps.zoom.min;
     zoomSlider.max = caps.zoom.max;
     zoomSlider.step = caps.zoom.step || 0.1;
-    const settings = videoTrack.getSettings();
-    zoomSlider.value = settings.zoom || caps.zoom.min;
+    // Byrjum á 0.6x og skrefum upp um 0.1 þar til gildið er innan þess sviðs sem tækið styður
+    let targetZoom = 0.6;
+    while (targetZoom < caps.zoom.min - 0.001) targetZoom += 0.1;
+    targetZoom = Math.round(targetZoom * 10) / 10; // forðumst fljótandi-kommu skekkju (0.7000000001 o.þ.h.)
+    targetZoom = Math.min(targetZoom, caps.zoom.max);
+    videoTrack.applyConstraints({ advanced: [{ zoom: targetZoom }] }).catch(() => {});
+    zoomSlider.value = targetZoom;
   }
 }
 
