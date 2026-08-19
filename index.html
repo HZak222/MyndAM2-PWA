@@ -297,7 +297,7 @@ async function startCamera(deviceId) {
 
   const chosenId = deviceId || preferredCameraId;
   const videoConstraints = chosenId
-    ? { deviceId: { exact: chosenId }, width: { ideal: 1920 }, height: { ideal: 1080 } }
+    ? { deviceId: { exact: chosenId }, width: { ideal: 3840 }, height: { ideal: 2160 } }
     : { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } };
 
   try {
@@ -436,7 +436,7 @@ function capturePhoto() {
     const num = String(photoCount).padStart(3, '0');
     const filename = plate + '_' + ts + '_' + num + '.jpg';
     queueUpload(blob, filename);
-  }, 'image/jpeg', 0.82);
+  }, 'image/jpeg', 0.9);
 }
 
 // ===== UPLOAD =====
