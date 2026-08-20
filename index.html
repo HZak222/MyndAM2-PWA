@@ -173,16 +173,19 @@
         <span>−</span>
         <input type="range" id="zoom-slider" min="1" max="1" step="0.1" value="1" oninput="setZoom(this.value)">
         <span>+</span>
+        <span id="zoom-value" style="width:44px;text-align:right">1.0×</span>
       </div>
       <div class="cam-bottom">
-        <div style="width:90px">
+        <div style="display:flex;gap:8px">
           <button class="btn-icon" id="btn-flash" onclick="toggleFlash()">🔦</button>
+          <button class="btn-icon" id="btn-gallery" style="display:flex" onclick="document.getElementById('gallery-input').click()">🖼️</button>
         </div>
         <button class="btn-capture" onclick="capturePhoto()"></button>
         <div style="width:90px;display:flex;justify-content:flex-end">
           <button class="btn btn-danger" style="font-size:.95rem;padding:12px 14px" onclick="endSession()">Ljúka</button>
         </div>
       </div>
+      <input type="file" id="gallery-input" accept="image/*" multiple style="display:none" onchange="handleGalleryFiles(this.files)">
     </div>
   </div>
 </div>
@@ -295,10 +298,11 @@ async function startCamera(deviceId) {
   document.getElementById('cam-err').classList.remove('show');
   updateUI();
 
+  const HQ = { width: { min: 1920, ideal: 4032 }, height: { min: 1080, ideal: 3024 } };
   const chosenId = deviceId || preferredCameraId;
   const videoConstraints = chosenId
-    ? { deviceId: { exact: chosenId }, width: { ideal: 3840 }, height: { ideal: 2160 } }
-    : { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } };
+    ? { deviceId: { exact: chosenId }, ...HQ }
+    : { facingMode: { ideal: 'environment' }, ...HQ };
 
   try {
     let stream;
@@ -310,7 +314,7 @@ async function startCamera(deviceId) {
         preferredCameraId = '';
         localStorage.removeItem('preferredCameraId');
         stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } },
+          video: { facingMode: { ideal: 'environment' }, ...HQ },
           audio: false
         });
       } else { throw 0; }
@@ -319,10 +323,32 @@ async function startCamera(deviceId) {
     document.getElementById('video').srcObject = stream;
     videoTrack = stream.getVideoTracks()[0];
     setupCameraControls();
-    setupLensPicker();
+    await setupLensPicker();
+    // Í fyrsta skipti (engin vistuð linsa) - reyni að finna og velja gleiðhorns (ultra wide) myndavélina sjálfkrafa
+    if (!chosenId && !localStorage.getItem('autoWideDone')) {
+      localStorage.setItem('autoWideDone', '1');
+      await autoSelectWideLens();
+    }
   } catch {
     document.getElementById('cam-err').classList.add('show');
   }
+}
+
+async function autoSelectWideLens() {
+  try {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const backCams = devices.filter(d => d.kind === 'videoinput' && !/front/i.test(d.label));
+    // Leita fyrst að tæki merktu beinlínis "ultra wide" (áreiðanlegt á iPhone/Safari)
+    let wide = backCams.find(c => /ultra.?wide/i.test(c.label));
+    // Annars, tæki sem inniheldur "wide" en ekki "tele"
+    if (!wide) wide = backCams.find(c => /wide/i.test(c.label) && !/tele/i.test(c.label));
+    if (wide && videoTrack && videoTrack.getSettings().deviceId !== wide.deviceId) {
+      preferredCameraId = wide.deviceId;
+      localStorage.setItem('preferredCameraId', wide.deviceId);
+      if (cameraStream) cameraStream.getTracks().forEach(t => t.stop());
+      await startCamera(wide.deviceId);
+    }
+  } catch {}
 }
 
 async function setupLensPicker() {
@@ -384,14 +410,23 @@ function setupCameraControls() {
     zoomSlider.min = caps.zoom.min;
     zoomSlider.max = caps.zoom.max;
     zoomSlider.step = caps.zoom.step || 0.1;
-    // Byrjum á 0.6x og skrefum upp um 0.1 þar til gildið er innan þess sviðs sem tækið styður
-    let targetZoom = 0.6;
+    // Byrjum á 0.7x (flestir símar sem styðja gleiðhorn í gegnum zoom ráða við það) og skrefum upp
+    // um 0.1 þar til gildið er innan þess sviðs sem tækið styður
+    let targetZoom = 0.7;
     while (targetZoom < caps.zoom.min - 0.001) targetZoom += 0.1;
     targetZoom = Math.round(targetZoom * 10) / 10; // forðumst fljótandi-kommu skekkju (0.7000000001 o.þ.h.)
     targetZoom = Math.min(targetZoom, caps.zoom.max);
     videoTrack.applyConstraints({ advanced: [{ zoom: targetZoom }] }).catch(() => {});
     zoomSlider.value = targetZoom;
+    updateZoomLabel(targetZoom);
+  } else {
+    updateZoomLabel(1);
   }
+}
+
+function updateZoomLabel(value) {
+  const el = document.getElementById('zoom-value');
+  if (el) el.textContent = parseFloat(value).toFixed(1) + '×';
 }
 
 async function toggleFlash() {
@@ -407,6 +442,7 @@ async function toggleFlash() {
 }
 
 async function setZoom(value) {
+  updateZoomLabel(value);
   if (!videoTrack) return;
   try { await videoTrack.applyConstraints({ advanced: [{ zoom: parseFloat(value) }] }); } catch {}
 }
@@ -436,7 +472,23 @@ function capturePhoto() {
     const num = String(photoCount).padStart(3, '0');
     const filename = plate + '_' + ts + '_' + num + '.jpg';
     queueUpload(blob, filename);
-  }, 'image/jpeg', 0.9);
+  }, 'image/jpeg', 0.92);
+}
+
+// ===== MYNDASAFN (myndir teknar áður á símann) =====
+function handleGalleryFiles(fileList) {
+  const files = Array.from(fileList);
+  if (!files.length) return;
+  files.forEach(file => {
+    photoCount++; updateUI();
+    const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+    const num = String(photoCount).padStart(3, '0');
+    const extMatch = /\.([a-zA-Z0-9]+)$/.exec(file.name || '');
+    const ext = extMatch ? extMatch[1].toLowerCase() : 'jpg';
+    const filename = plate + '_' + ts + '_' + num + '.' + ext;
+    queueUpload(file, filename);
+  });
+  document.getElementById('gallery-input').value = '';
 }
 
 // ===== UPLOAD =====
