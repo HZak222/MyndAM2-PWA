@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#f59e0b">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Mynda">
+  <link rel="manifest" href="manifest.json">
+  <title>Mynda</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#0a0a0a;--surface:#161616;--surface2:#1f1f1f;--border:#2a2a2a;--accent:#f59e0b;--text:#f0f0f0;--text-muted:#777;--success:#22c55e;--error:#ef4444}
+    *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html,body{height:100%;overflow:hidden}
+    body{background:var(--bg);color:var(--text);font-family:'Barlow Condensed',system-ui,sans-serif}
+    #app{height:100%}
+    .screen{display:none;flex-direction:column;height:100%}
+    .screen.active{display:flex}
+    .btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:16px 24px;border:none;border-radius:4px;font-family:'Barlow Condensed',sans-serif;font-size:1.15rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:all .12s;user-select:none;-webkit-user-select:none}
+    .btn-primary{background:var(--accent);color:#000}.btn-primary:active{background:#d97706;transform:scale(.97)}
+    .btn-ghost{background:transparent;color:var(--text-muted);border:1px solid var(--border)}.btn-ghost:active{background:var(--surface2)}
+    .btn-danger{background:transparent;color:var(--error);border:1px solid var(--error)}.btn-danger:active{background:rgba(239,68,68,.12)}
+    input[type="text"],input[type="email"]{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:16px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:1rem;outline:none;transition:border-color .2s}
+    input:focus{border-color:var(--accent)}
+    input.invalid{border-color:var(--error)}
+    input::placeholder{color:var(--text-muted)}
+    label{display:block;font-size:.8rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px}
+    .page{padding:max(48px,env(safe-area-inset-top,48px)) 24px 32px;justify-content:center}
+    .logo{font-size:4.5rem;font-weight:900;color:var(--accent);line-height:1;letter-spacing:-.02em}
+    .logo-sub{font-size:.8rem;letter-spacing:.22em;text-transform:uppercase;color:var(--text-muted);margin-bottom:40px;margin-top:4px}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:24px}
+    .card-title{font-size:1.1rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px}
+    .card-desc{font-size:.95rem;color:var(--text-muted);line-height:1.5;margin-bottom:20px}
+    .fg{margin-bottom:16px}
+    .field-err{font-size:.78rem;color:var(--error);margin-top:6px;display:none}
+    .field-err.show{display:block}
+    .big-input{font-size:1.8rem!important;font-weight:700;text-align:center;text-transform:uppercase;letter-spacing:.12em;padding:20px!important}
+    .divider{border:none;border-top:1px solid var(--border);margin:20px 0}
+    .session-logo{font-size:3.5rem;font-weight:900;color:var(--accent);letter-spacing:-.02em;text-align:center;margin-bottom:6px}
+    .user-bar{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:28px;flex-wrap:wrap}
+    .user-chip{background:var(--surface2);border:1px solid var(--border);border-radius:100px;padding:5px 14px;font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--text-muted);display:flex;align-items:center;gap:6px;max-width:100%;overflow:hidden}
+    .user-chip strong{color:var(--accent);font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .change-btn{background:none;border:none;color:var(--text-muted);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;flex-shrink:0}
+    .btn-start{font-size:1.4rem;padding:20px;margin-top:20px;width:100%}
+    /* camera */
+    #screen-camera{padding:0;position:relative;background:#000}
+    #video{width:100%;height:100%;object-fit:cover;display:block}
+    #canvas{display:none}
+    .cam-overlay{position:absolute;inset:0;display:flex;flex-direction:column;pointer-events:none}
+    .cam-top{padding:16px 16px 20px;padding-top:max(16px,env(safe-area-inset-top,16px));background:linear-gradient(to bottom,rgba(0,0,0,.72),transparent);display:flex;align-items:flex-start;flex-wrap:wrap;gap:8px;pointer-events:all}
+    .session-badge{background:var(--accent);color:#000;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1rem;letter-spacing:.06em;text-transform:uppercase;padding:6px 12px;border-radius:4px}
+    .info-pill{background:rgba(0,0,0,.55);color:#fff;font-family:'JetBrains Mono',monospace;font-size:.82rem;padding:6px 12px;border-radius:4px;border:1px solid rgba(255,255,255,.18);display:flex;align-items:center;gap:6px;max-width:220px;overflow:hidden}
+    .info-pill span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .dot{width:8px;height:8px;border-radius:50%;background:currentColor;flex-shrink:0}
+    .dot.pulse{animation:pulse 1.2s infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+    .status-ok{color:var(--success)}.status-pending{color:var(--accent)}.status-error{color:var(--error)}
+    .cam-spacer{flex:1}
+    .cam-bottom{padding:20px 24px;padding-bottom:max(24px,env(safe-area-inset-bottom,24px));background:linear-gradient(to top,rgba(0,0,0,.8),transparent);display:flex;align-items:center;justify-content:space-between;pointer-events:all}
+    .btn-capture{width:80px;height:80px;border-radius:50%;background:white;border:4px solid rgba(255,255,255,.35);cursor:pointer;position:relative;outline:none;transition:transform .1s}
+    .btn-capture::after{content:'';position:absolute;inset:6px;border-radius:50%;background:white}
+    .btn-capture:active{transform:scale(.90)}
+    .cam-err{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;background:#000;padding:36px;text-align:center}
+    .cam-err.show{display:flex}
+    .cam-err h3{font-size:1.3rem;font-weight:700;color:var(--error);margin-bottom:12px}
+    .cam-err p{color:var(--text-muted);font-size:1rem;line-height:1.6}
+    .flash-overlay{position:fixed;inset:0;background:white;opacity:0;pointer-events:none;z-index:100;transition:opacity .05s}
+    .flash-overlay.flash{opacity:.65;transition:opacity 0s}
+    .toast{position:fixed;bottom:140px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--surface);border:1px solid var(--border);color:var(--text);padding:10px 22px;border-radius:100px;font-size:.9rem;letter-spacing:.05em;opacity:0;pointer-events:none;z-index:200;transition:all .25s;white-space:nowrap}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+    .toast.success{border-color:var(--success);color:var(--success)}
+    .toast.error{border-color:var(--error);color:var(--error)}
+    .btn-icon{width:56px;height:56px;border-radius:50%;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.18);color:#fff;font-size:1.4rem;display:none;align-items:center;justify-content:center;cursor:pointer;transition:background .15s,color .15s}
+    .btn-icon.active{background:var(--accent);color:#000;border-color:var(--accent)}
+    .zoom-row{display:none;align-items:center;gap:10px;padding:0 24px 14px;pointer-events:all}
+    .zoom-row span{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--text-muted);width:28px}
+    .zoom-row input[type="range"]{flex:1;accent-color:var(--accent)}
+    .device-toggle{display:flex;gap:8px;margin-bottom:18px}
+    .device-btn{flex:1;padding:10px 8px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text-muted);font-size:.85rem;font-weight:600;cursor:pointer;transition:all .15s}
+    .device-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(245,158,11,.1)}
+    .device-hint{font-size:.72rem;color:var(--text-muted);margin:-12px 0 18px}
+    .device-line{font-size:.72rem;color:var(--text-muted);text-align:center;margin-top:10px}
+    .device-line a{color:var(--accent);text-decoration:none}
+    .info-pill.btn-lens{cursor:pointer}
+    .lens-panel{display:none;position:absolute;top:64px;right:16px;z-index:40;background:rgba(20,20,20,.95);border:1px solid rgba(255,255,255,.18);border-radius:10px;padding:6px;min-width:200px;pointer-events:all}
+    .lens-panel.show{display:block}
+    .lens-opt{padding:10px 12px;border-radius:6px;color:#fff;font-size:.85rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:8px}
+    .lens-opt:hover{background:rgba(255,255,255,.08)}
+    .lens-opt.active{color:var(--accent);font-weight:600}
+  </style>
+</head>
+<body>
+<div id="app">
+  <div class="flash-overlay" id="flash-overlay"></div>
+  <div class="toast" id="toast"></div>
+
+  <!-- 1. EMAIL — fyrsta skipti -->
+  <div class="screen active" id="screen-email">
+    <div class="page" style="display:flex;flex-direction:column">
+      <div class="logo">MYNDA</div>
+      <div class="logo-sub">Ljósmyndun → Google Drive</div>
+      <div class="card">
+        <div class="card-title">👋 Velkomin/n!</div>
+        <div class="device-toggle">
+          <button type="button" class="device-btn active" id="btn-device-private" onclick="setDeviceType('private')">📱 Einkasími</button>
+          <button type="button" class="device-btn" id="btn-device-shared" onclick="setDeviceType('shared')">🏢 Almenningssími</button>
+        </div>
+        <div class="device-hint" id="device-hint">Netfangið vistast í símanum þar til þú breytir því.</div>
+        <div class="card-desc">Sláðu inn vinnupóstfang þitt. Þetta vistast í símann og myndirnar fara sjálfkrafa í möppuna þína.</div>
+        <div class="fg">
+          <label>Vinnupóstfang</label>
+          <input type="email" id="email-input"
+            placeholder="nafn@bl.is"
+            autocomplete="email" spellcheck="false"
+            autocapitalize="none" maxlength="60"
+            inputmode="email">
+          <div class="field-err" id="email-err">Póstfangið þarf að vera @bl.is</div>
+        </div>
+        <button class="btn btn-primary" style="width:100%;margin-top:4px" onclick="saveEmail()">Halda áfram →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. SESSION — bílnúmer -->
+  <div class="screen" id="screen-session">
+    <div class="page" style="display:flex;flex-direction:column">
+      <div class="session-logo">MYNDA</div>
+      <div class="user-bar">
+        <div class="user-chip">✉️ <strong id="user-display">—</strong></div>
+        <button class="change-btn" onclick="changeEmail()">breyta</button>
+      </div>
+      <div class="device-line">Sími: <span id="device-label">Einkasími</span> · <a href="#" onclick="toggleDeviceTypeQuick();return false">breyta</a></div>
+      <div class="card">
+        <div class="fg" style="margin-bottom:0">
+          <label>Bílnúmer</label>
+          <input type="text" id="plate-input" class="big-input" placeholder="ABC 123"
+            autocomplete="off" spellcheck="false" autocapitalize="characters" maxlength="15">
+          <div class="field-err" id="plate-err">Sláðu inn bílnúmer</div>
+        </div>
+        <button class="btn btn-primary btn-start" onclick="startSession()">📷 Hefja Session</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. MYNDAVÉL -->
+  <div class="screen" id="screen-camera">
+    <video id="video" autoplay playsinline muted></video>
+    <canvas id="canvas"></canvas>
+    <div class="cam-err" id="cam-err">
+      <div style="font-size:3rem;margin-bottom:16px">🚫</div>
+      <h3>Myndavél leyfð ekki</h3>
+      <p>Þú þarft að leyfa aðgang að myndavél í stillingum vafrans eða símsins.</p>
+      <button class="btn btn-ghost" style="margin-top:24px" onclick="showSession()">← Til baka</button>
+    </div>
+    <div class="cam-overlay">
+      <div class="cam-top">
+        <div class="session-badge" id="cam-plate">—</div>
+        <div class="info-pill" id="cam-user">✉️ <span>—</span></div>
+        <div class="info-pill" id="pill-count">📷 0</div>
+        <div class="info-pill status-ok" id="pill-status">
+          <div class="dot" id="status-dot"></div>
+          <span id="status-text">Tilbúið</span>
+        </div>
+        <div class="info-pill btn-lens" id="pill-lens" onclick="toggleLensPanel()" style="display:none">
+          🔁 <span id="lens-label">Linsa</span>
+        </div>
+      </div>
+      <div class="lens-panel" id="lens-panel"></div>
+      <div class="cam-spacer"></div>
+      <div class="zoom-row" id="zoom-row">
+        <span>−</span>
+        <input type="range" id="zoom-slider" min="1" max="1" step="0.1" value="1" oninput="setZoom(this.value)">
+        <span>+</span>
+        <span id="zoom-value" style="width:44px;text-align:right">1.0×</span>
+      </div>
+      <div class="cam-bottom">
+        <div style="display:flex;gap:8px">
+          <button class="btn-icon" id="btn-flash" onclick="toggleFlash()">🔦</button>
+          <button class="btn-icon" id="btn-gallery" style="display:flex" onclick="document.getElementById('gallery-input').click()">🖼️</button>
+        </div>
+        <button class="btn-capture" onclick="capturePhoto()"></button>
+        <div style="width:90px;display:flex;justify-content:flex-end">
+          <button class="btn btn-danger" style="font-size:.95rem;padding:12px 14px" onclick="endSession()">Ljúka</button>
+        </div>
+      </div>
+      <input type="file" id="gallery-input" accept="image/*" multiple style="display:none" onchange="handleGalleryFiles(this.files)">
+    </div>
+  </div>
+</div>
+
+<script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwtbt6O3J35nXC-TVKJKBwdkPHY15L2FryZWoc4r44-msladRQtpVCaE0i5iDs_aDK88Q/exec';
+const ALLOWED_DOMAIN = 'bl.is'; // Aðeins þetta lén leyft
+
+let userEmail = '', plate = '', deviceType = 'private';
+let photoCount = 0, uploadedCount = 0, failedCount = 0;
+let uploadQueue = [], isUploading = false, cameraStream = null;
+let videoTrack = null, torchOn = false;
+let preferredCameraId = localStorage.getItem('preferredCameraId') || '';
+
+// ===== INIT =====
+window.addEventListener('load', () => {
+  deviceType = localStorage.getItem('deviceType') || 'private';
+  setDeviceType(deviceType);
+  userEmail = localStorage.getItem('userEmail') || '';
+  if (userEmail) showSession(); else showScreen('email');
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+});
+
+function setDeviceType(type) {
+  deviceType = type;
+  localStorage.setItem('deviceType', type);
+  document.getElementById('btn-device-private').classList.toggle('active', type === 'private');
+  document.getElementById('btn-device-shared').classList.toggle('active', type === 'shared');
+  document.getElementById('device-hint').textContent = type === 'shared'
+    ? 'Netfangið hreinsast sjálfkrafa eftir hverja session - næsti notandi slær inn sitt eigið.'
+    : 'Netfangið vistast í símanum þar til þú breytir því.';
+}
+
+function showScreen(n) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + n).classList.add('active');
+}
+
+// ===== EMAIL =====
+function isValidEmail(e) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e) && e.toLowerCase().endsWith('@' + ALLOWED_DOMAIN);
+}
+
+function saveEmail() {
+  const inp = document.getElementById('email-input');
+  const errEl = document.getElementById('email-err');
+  const email = inp.value.trim().toLowerCase();
+
+  if (!isValidEmail(email)) {
+    inp.classList.add('invalid');
+    errEl.classList.add('show');
+    inp.focus();
+    return;
+  }
+  inp.classList.remove('invalid');
+  errEl.classList.remove('show');
+  userEmail = email;
+  localStorage.setItem('userEmail', userEmail);
+  showSession();
+}
+
+function changeEmail() {
+  if (!confirm('Breyta póstfangi?\n\nNúverandi: ' + userEmail)) return;
+  localStorage.removeItem('userEmail');
+  userEmail = '';
+  document.getElementById('email-input').value = '';
+  showScreen('email');
+  setTimeout(() => document.getElementById('email-input').focus(), 300);
+}
+
+// ===== SESSION =====
+function showSession() {
+  stopCamera();
+  document.getElementById('user-display').textContent = userEmail;
+  document.getElementById('device-label').textContent = deviceType === 'shared' ? 'Almenningssími' : 'Einkasími';
+  document.getElementById('plate-input').value = '';
+  document.getElementById('plate-err').classList.remove('show');
+  document.getElementById('plate-input').classList.remove('invalid');
+  showScreen('session');
+  setTimeout(() => document.getElementById('plate-input').focus(), 300);
+}
+
+function toggleDeviceTypeQuick() {
+  const next = deviceType === 'shared' ? 'private' : 'shared';
+  setDeviceType(next);
+  document.getElementById('device-label').textContent = next === 'shared' ? 'Almenningssími' : 'Einkasími';
+}
+
+function startSession() {
+  const inp = document.getElementById('plate-input');
+  const p = inp.value.trim().toUpperCase().replace(/\s+/g, '');
+  if (!p) {
+    inp.classList.add('invalid');
+    document.getElementById('plate-err').classList.add('show');
+    inp.focus();
+    return;
+  }
+  inp.classList.remove('invalid');
+  document.getElementById('plate-err').classList.remove('show');
+  plate = p;
+  photoCount = 0; uploadedCount = 0; failedCount = 0; uploadQueue = [];
+  startCamera();
+}
+
+// ===== MYNDAVÉL =====
+async function startCamera(deviceId) {
+  showScreen('camera');
+  document.getElementById('cam-plate').textContent = plate;
+  document.getElementById('cam-user').innerHTML = '✉️ <span>' + userEmail + '</span>';
+  document.getElementById('cam-err').classList.remove('show');
+  updateUI();
+
+  const HQ = { width: { min: 1920, ideal: 4032 }, height: { min: 1080, ideal: 3024 } };
+  const chosenId = deviceId || preferredCameraId;
+  const videoConstraints = chosenId
+    ? { deviceId: { exact: chosenId }, ...HQ }
+    : { facingMode: { ideal: 'environment' }, ...HQ };
+
+  try {
+    let stream;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ video: videoConstraints, audio: false });
+    } catch {
+      // Vistaða linsan er kannski ekki lengur til (t.d. eftir tækjaskipti) - reyni sjálfgefna linsu
+      if (chosenId) {
+        preferredCameraId = '';
+        localStorage.removeItem('preferredCameraId');
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: 'environment' }, ...HQ },
+          audio: false
+        });
+      } else { throw 0; }
+    }
+    cameraStream = stream;
+    document.getElementById('video').srcObject = stream;
+    videoTrack = stream.getVideoTracks()[0];
+    setupCameraControls();
+    await setupLensPicker();
+    // Í fyrsta skipti (engin vistuð linsa) - reyni að finna og velja gleiðhorns (ultra wide) myndavélina sjálfkrafa
+    if (!chosenId && !localStorage.getItem('autoWideDone')) {
+      localStorage.setItem('autoWideDone', '1');
+      await autoSelectWideLens();
+    }
+  } catch {
+    document.getElementById('cam-err').classList.add('show');
+  }
+}
+
+async function autoSelectWideLens() {
+  try {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const backCams = devices.filter(d => d.kind === 'videoinput' && !/front/i.test(d.label));
+    // Leita fyrst að tæki merktu beinlínis "ultra wide" (áreiðanlegt á iPhone/Safari)
+    let wide = backCams.find(c => /ultra.?wide/i.test(c.label));
+    // Annars, tæki sem inniheldur "wide" en ekki "tele"
+    if (!wide) wide = backCams.find(c => /wide/i.test(c.label) && !/tele/i.test(c.label));
+    if (wide && videoTrack && videoTrack.getSettings().deviceId !== wide.deviceId) {
+      preferredCameraId = wide.deviceId;
+      localStorage.setItem('preferredCameraId', wide.deviceId);
+      if (cameraStream) cameraStream.getTracks().forEach(t => t.stop());
+      await startCamera(wide.deviceId);
+    }
+  } catch {}
+}
+
+async function setupLensPicker() {
+  const pill = document.getElementById('pill-lens');
+  const panel = document.getElementById('lens-panel');
+  try {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const cams = devices.filter(d => d.kind === 'videoinput');
+    if (cams.length < 2) { pill.style.display = 'none'; panel.classList.remove('show'); return; }
+
+    const activeId = videoTrack.getSettings().deviceId;
+    document.getElementById('lens-label').textContent = 'Linsa ' + (cams.findIndex(c => c.deviceId === activeId) + 1);
+    pill.style.display = 'flex';
+
+    panel.innerHTML = cams.map((c, i) => {
+      const label = c.label ? c.label.replace(/^.*?,\s*/, '') : ('Myndavél ' + (i + 1));
+      const active = c.deviceId === activeId;
+      return '<div class="lens-opt' + (active ? ' active' : '') + '" onclick="selectLens(\'' + c.deviceId + '\')">'
+           + '<span>' + label + '</span>' + (active ? '<span>✓</span>' : '') + '</div>';
+    }).join('');
+  } catch {
+    pill.style.display = 'none';
+  }
+}
+
+function toggleLensPanel() {
+  document.getElementById('lens-panel').classList.toggle('show');
+}
+
+async function selectLens(deviceId) {
+  document.getElementById('lens-panel').classList.remove('show');
+  preferredCameraId = deviceId;
+  localStorage.setItem('preferredCameraId', deviceId);
+  if (cameraStream) cameraStream.getTracks().forEach(t => t.stop());
+  await startCamera(deviceId);
+}
+
+document.addEventListener('click', (e) => {
+  const panel = document.getElementById('lens-panel');
+  const pill = document.getElementById('pill-lens');
+  if (panel && panel.classList.contains('show') && !panel.contains(e.target) && e.target !== pill && !pill.contains(e.target)) {
+    panel.classList.remove('show');
+  }
+});
+
+function setupCameraControls() {
+  const flashBtn = document.getElementById('btn-flash');
+  const zoomRow = document.getElementById('zoom-row');
+  const zoomSlider = document.getElementById('zoom-slider');
+  torchOn = false;
+  flashBtn.classList.remove('active');
+  flashBtn.style.display = 'none';
+  zoomRow.style.display = 'none';
+  if (!videoTrack || !videoTrack.getCapabilities) return; // t.d. eldri iOS Safari
+  const caps = videoTrack.getCapabilities();
+  if (caps.torch) flashBtn.style.display = 'flex';
+  if (caps.zoom) {
+    zoomRow.style.display = 'flex';
+    zoomSlider.min = caps.zoom.min;
+    zoomSlider.max = caps.zoom.max;
+    zoomSlider.step = caps.zoom.step || 0.1;
+    // Byrjum á 0.7x (flestir símar sem styðja gleiðhorn í gegnum zoom ráða við það) og skrefum upp
+    // um 0.1 þar til gildið er innan þess sviðs sem tækið styður
+    let targetZoom = 0.7;
+    while (targetZoom < caps.zoom.min - 0.001) targetZoom += 0.1;
+    targetZoom = Math.round(targetZoom * 10) / 10; // forðumst fljótandi-kommu skekkju (0.7000000001 o.þ.h.)
+    targetZoom = Math.min(targetZoom, caps.zoom.max);
+    videoTrack.applyConstraints({ advanced: [{ zoom: targetZoom }] }).catch(() => {});
+    zoomSlider.value = targetZoom;
+    updateZoomLabel(targetZoom);
+  } else {
+    updateZoomLabel(1);
+  }
+}
+
+function updateZoomLabel(value) {
+  const el = document.getElementById('zoom-value');
+  if (el) el.textContent = parseFloat(value).toFixed(1) + '×';
+}
+
+async function toggleFlash() {
+  if (!videoTrack) return;
+  const next = !torchOn;
+  try {
+    await videoTrack.applyConstraints({ advanced: [{ torch: next }] });
+    torchOn = next;
+    document.getElementById('btn-flash').classList.toggle('active', torchOn);
+  } catch {
+    showToast('Flass ekki stutt á þessu tæki', 'error');
+  }
+}
+
+async function setZoom(value) {
+  updateZoomLabel(value);
+  if (!videoTrack) return;
+  try { await videoTrack.applyConstraints({ advanced: [{ zoom: parseFloat(value) }] }); } catch {}
+}
+
+function stopCamera() {
+  if (cameraStream) { cameraStream.getTracks().forEach(t => t.stop()); cameraStream = null; }
+  document.getElementById('video').srcObject = null;
+  videoTrack = null; torchOn = false;
+  document.getElementById('btn-flash').classList.remove('active');
+  document.getElementById('btn-flash').style.display = 'none';
+  document.getElementById('zoom-row').style.display = 'none';
+  document.getElementById('pill-lens').style.display = 'none';
+  document.getElementById('lens-panel').classList.remove('show');
+}
+
+function capturePhoto() {
+  const video = document.getElementById('video');
+  if (!video.videoWidth) return;
+  const fl = document.getElementById('flash-overlay');
+  fl.classList.add('flash'); setTimeout(() => fl.classList.remove('flash'), 100);
+  const canvas = document.getElementById('canvas');
+  canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+  canvas.getContext('2d').drawImage(video, 0, 0);
+  photoCount++; updateUI();
+  canvas.toBlob(blob => {
+    const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+    const num = String(photoCount).padStart(3, '0');
+    const filename = plate + '_' + ts + '_' + num + '.jpg';
+    queueUpload(blob, filename);
+  }, 'image/jpeg', 0.92);
+}
+
+// ===== MYNDASAFN (myndir teknar áður á símann) =====
+function handleGalleryFiles(fileList) {
+  const files = Array.from(fileList);
+  if (!files.length) return;
+  files.forEach(file => {
+    photoCount++; updateUI();
+    const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+    const num = String(photoCount).padStart(3, '0');
+    const extMatch = /\.([a-zA-Z0-9]+)$/.exec(file.name || '');
+    const ext = extMatch ? extMatch[1].toLowerCase() : 'jpg';
+    const filename = plate + '_' + ts + '_' + num + '.' + ext;
+    queueUpload(file, filename);
+  });
+  document.getElementById('gallery-input').value = '';
+}
+
+// ===== UPLOAD =====
+function queueUpload(blob, filename) {
+  uploadQueue.push({ blob, filename, retries: 0 }); updateUI(); processQueue();
+}
+
+async function processQueue() {
+  if (isUploading || uploadQueue.length === 0) return;
+  isUploading = true; updateUI();
+  const item = uploadQueue[0];
+  try {
+    const b64 = await blobToBase64(item.blob);
+    const res = await fetch(SCRIPT_URL, {
+      method: 'POST', redirect: 'follow',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({
+        action: 'upload',
+        userEmail, plate,
+        imageBase64: b64.split(',')[1],
+        filename: item.filename
+      })
+    });
+    let ok = res.ok;
+    try { const j = await res.json(); ok = j.success; } catch {}
+    if (ok) { uploadQueue.shift(); uploadedCount++; } else handleFail(item);
+  } catch { handleFail(item); }
+  isUploading = false; updateUI();
+  if (uploadQueue.length > 0) setTimeout(processQueue, 1800);
+}
+
+function handleFail(item) {
+  item.retries = (item.retries || 0) + 1;
+  if (item.retries >= 5) { uploadQueue.shift(); failedCount++; showToast('Upload mistókst', 'error'); }
+}
+
+function updateUI() {
+  document.getElementById('pill-count').textContent = '📷 ' + photoCount;
+  const pill = document.getElementById('pill-status');
+  const dot = document.getElementById('status-dot');
+  const txt = document.getElementById('status-text');
+  const pend = uploadQueue.length;
+  if (failedCount > 0) {
+    pill.className = 'info-pill status-error'; dot.classList.add('pulse'); txt.textContent = failedCount + ' mistókst';
+  } else if (pend > 0 || isUploading) {
+    pill.className = 'info-pill status-pending'; dot.classList.add('pulse');
+    txt.textContent = isUploading ? 'Sendir...' : pend + ' í biðröð';
+  } else {
+    pill.className = 'info-pill status-ok'; dot.classList.remove('pulse');
+    txt.textContent = uploadedCount > 0 ? uploadedCount + ' sent ✓' : 'Tilbúið';
+  }
+}
+
+// ===== LJÚKA — staðfestir að myndirnar hafi verið sendar =====
+async function endSession() {
+  if (uploadQueue.length > 0 && !confirm('Það eru ' + uploadQueue.length + ' myndir enn að senda. Ert þú viss?')) return;
+
+  stopCamera();
+
+  const count = uploadedCount > 0 ? uploadedCount : photoCount;
+  showToast('✅ ' + count + ' mynd' + (count === 1 ? '' : 'ir') + ' sendar', 'success');
+
+  if (deviceType === 'shared') {
+    localStorage.removeItem('userEmail');
+    userEmail = '';
+    setTimeout(() => {
+      document.getElementById('email-input').value = '';
+      showScreen('email');
+    }, 2500);
+  } else {
+    setTimeout(showSession, 2500);
+  }
+}
+
+function blobToBase64(blob) {
+  return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(blob); });
+}
+
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast ' + (type || '') + ' show';
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+document.getElementById('email-input').addEventListener('keydown', e => { if (e.key === 'Enter') saveEmail(); });
+document.getElementById('plate-input').addEventListener('keydown', e => { if (e.key === 'Enter') startSession(); });
+</script>
+</body>
+</html>
